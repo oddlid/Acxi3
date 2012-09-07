@@ -73,6 +73,8 @@ sub mtime {
 }
 
 sub statbuf {
+   # Return cached result of the last stat, src or dst file, depending on arg $trg
+   # Might be undef if mtime has not yet been run
    my $self = shift;
    my $trg = shift || 0;
    return $trg ? $self->{stat}{dst} : $self->{stat}{src};
@@ -84,6 +86,10 @@ sub fext {
    my ($ext) = $rfname =~ /(\S*?)\./;
    return unless (defined($ext));
    return lc reverse $ext;
+}
+
+sub cur_mime {
+   return shift()->{cur_mime};
 }
 
 sub get_mime {
@@ -99,6 +105,17 @@ sub check_mime {
    my $type = shift;
    my $file = shift;
    return ($self->get_mime($file) eq $self->{mime_types}{$type});
+}
+
+sub spawn {
+   my $self = shift;
+   my $coderef = shift;
+   return unless (ref($coderef) eq 'CODE');
+   my $pid;
+   return unless (defined($pid = fork()));
+   return $pid if ($pid);
+   #push(@{$self->{child_pids}}, $pid);
+   exit($coderef->());
 }
 
 

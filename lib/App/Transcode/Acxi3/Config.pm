@@ -58,6 +58,10 @@ sub _init {
    return $self->_locate_ext_binaries();
 }
 
+sub util {
+   return shift()->{_util};
+}
+
 sub _locate_ext_binaries {
    my $self = shift;
    foreach my $cmd (qw/FLAC METAFLAC OGG LAME FILE/) {
