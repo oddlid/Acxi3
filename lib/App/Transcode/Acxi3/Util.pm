@@ -6,10 +6,9 @@ use warnings;
 use mro 'c3';
 
 use Carp;
-use Fcntl;
-#use File::Stat;
-use IO::File;
-use IO::Handle;
+#use Fcntl;
+#use IO::File;
+#use IO::Handle;
 use File::Spec;
 
 use constant F_BASE      => 0x0001;

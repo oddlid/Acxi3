@@ -56,8 +56,6 @@ sub _init {
       xfile      => $self->{user_settings}{COMMAND_FILE}
    );
    return $self->_locate_ext_binaries();
-   #print(Dumper($self));
-   #return $self;
 }
 
 sub _locate_ext_binaries {
@@ -96,13 +94,13 @@ sub load {
 }
 
 sub save {
-   my $self  = shift;
+   my $self = shift;
    my $cfile = shift || $self->{cfgfile_user};
-   my $fh    = IO::File->new($cfile, O_WRONLY | O_TRUNC | O_CREAT);
+   my @cfg;
+   my $fh = IO::File->new($cfile, O_WRONLY | O_TRUNC | O_CREAT);
    return unless (defined($fh));
 
    while (my ($k, $v) = each(%{ $self->{user_settings} })) {
-      # need some extra stuff for writing out the user_types array here
       if (ref($v) eq 'ARRAY') {
          $v = join(',', @$v);
       }

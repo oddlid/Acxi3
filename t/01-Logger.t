@@ -20,8 +20,10 @@ is($log->level(4), 4, ' level(4)');
 # Now the level should be set to DEBUG (4)
 ok($log->is_debug(), ' level set to DEBUG');
 
-#$log->fh(*STDERR{IO});
-#$log->debug("Logging at lvl DEBUG\n");
+open(my $fh, ">", "/tmp/acxi_logger.out") or die;
+$log->fh($fh);
+$log->debug("Logging at lvl DEBUG, to a file\n");
+close($fh);
 
 done_testing();
 
