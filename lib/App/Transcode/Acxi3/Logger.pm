@@ -13,7 +13,7 @@ use constant NOTICE => 2;
 use constant INFO   => 3;
 use constant DEBUG  => 4;
 
-my @_lstr = ('ERROR: ', 'WARNING: ', 'NOTICE: ', 'INFO: ', 'DEBUG: ',);
+my @_lstr = ('ERROR: ', 'WARNING: ', 'NOTICE: ', 'INFO: ', 'DEBUG: ');
 
 sub new {
    my $class = shift;

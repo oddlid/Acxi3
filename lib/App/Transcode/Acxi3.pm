@@ -1,7 +1,3 @@
-#!/usr/bin/env perl
-#
-#
-
 package App::Transcode::Acxi3;
 
 use 5.012;
@@ -9,6 +5,7 @@ use strict;
 use warnings;
 use mro 'c3';
 
+use Carp;
 use Data::Dumper;
 
 
@@ -38,3 +35,5 @@ sub run {
 }
 
 1;
+__END__
+
