@@ -108,12 +108,12 @@ sub check_mime {
 }
 
 sub spawn {
-   my $self = shift;
+   my $self    = shift;
    my $coderef = shift;
    return unless (ref($coderef) eq 'CODE');
    my $pid;
    return unless (defined($pid = fork()));
-   return $pid if ($pid);
+   return if ($pid);
    #push(@{$self->{child_pids}}, $pid);
    exit($coderef->());
 }
