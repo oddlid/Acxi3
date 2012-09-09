@@ -6,10 +6,12 @@ use warnings;
 use mro 'c3';
 
 use Carp;
-#use Fcntl;
-#use IO::File;
-#use IO::Handle;
+use Fcntl;
+use IO::File;
+use IO::Handle;
 use File::Spec;
+use IPC::Cmd qw(can_run run run_forked QUOTE);
+use App::Transcode::Acxi3::Logger;
 
 use constant F_BASE      => 0x0001;
 use constant F_SRC_EXIST => F_BASE << 1;
@@ -18,6 +20,7 @@ use constant F_SRC_AGE   => F_BASE << 3;
 use constant F_DST_AGE   => F_BASE << 4;
 
 my $_singleton;
+my $_log;
 
 sub new {
    my $class = shift;
@@ -25,7 +28,7 @@ sub new {
    my %cfg   = (
       mime_types => [],
       xfile      => undef,
-      path       => [ split(/:/, $ENV{PATH}) ],
+      #path       => [ split(/:/, $ENV{PATH}) ],
       cur_mime   => undef,
    );
    @cfg{ keys(%args) } = values(%args);    # merge defaults and params
@@ -34,17 +37,21 @@ sub new {
    return $_singleton;
 }
 
+#sub log {
+#   return $_log //= App::Transcode::Acxi3::Logger::get_instance();
+#}
+
 sub which {
    my $self = shift;
-   my $exe  = shift;
-   return $exe if (-x $exe);               # don't check if valid full path is given
-   foreach (@{ $self->{path} }) {
-      my $abs_path = File::Spec->catfile($_, $exe);
-      if (-x $abs_path) {
-         return $abs_path;
-      }
-   }
-   return undef;
+   my $app  = shift;
+   my $ret  = IPC::Cmd::can_run($app);
+#   if ($ret) {
+#      $self->log()->debug(qq(Found app "%s" at "%s"\n), $app, $ret);
+#   }
+#   else {
+#      $self->log()->warn(qq(Unable to find executable: "%s"\n), $app);
+#   }
+   return $ret;
 }
 
 sub mtime {
@@ -86,6 +93,24 @@ sub fext {
    my ($ext) = $rfname =~ /(\S*?)\./;
    return unless (defined($ext));
    return lc reverse $ext;
+}
+
+sub exec_read_kv {
+   # Opens a pipe to the output of given command, and splits the output
+   # in key / value format and returns it as a hash reference.
+   # The most common denominator in reading tags.
+   my $self  = shift;
+   my $cmd   = shift;
+   my $kvsep = shift;    # key/value separator in input from pipe
+   my %ret;
+   open(my $fh, "-|", $cmd) || croak;
+   while (defined(my $line = <$fh>)) {
+      chomp($line);
+      my ($k, $v) = split(/$kvsep/, $line);
+      $ret{$k} = $v;
+   }
+   close($fh) or croak;
+   return \%ret;
 }
 
 sub cur_mime {

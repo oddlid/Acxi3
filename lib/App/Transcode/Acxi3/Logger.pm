@@ -14,13 +14,25 @@ use constant INFO   => 3;
 use constant DEBUG  => 4;
 
 my @_lstr = ('ERROR: ', 'WARNING: ', 'NOTICE: ', 'INFO: ', 'DEBUG: ');
+my $_singleton;
 
 sub new {
    my $class = shift;
    my $level = shift || NOTICE;
    my $fh    = shift;
 
-   return bless({ _level => $level, _fh => $fh }, $class);
+   if (!defined($_singleton)) {
+      $_singleton = bless({ _level => $level, _fh => $fh }, $class);
+   }
+   else {
+      $_singleton->level($level);
+      $_singleton->fh($fh) if ($fh);
+   }
+   return $_singleton;
+}
+
+sub get_instance {
+   return $_singleton //= __PACKAGE__->new(@_);
 }
 
 sub fh {
@@ -39,8 +51,11 @@ sub level {
       if ($lvl >= ERR && $lvl <= DEBUG) {
          $self->{_level} = $lvl;
       }
+      else {
+         $self->{_level} = WARN;
+      }
    }
-   return $self->{_level} //= WARN;
+   return $self->{_level};
 }
 
 sub is {

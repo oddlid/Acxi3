@@ -44,13 +44,16 @@ my $_defaults = {
 sub new {
    my $class = shift;
    my $self = bless($_defaults, $class);
-   return $self->_init();    # _init() returns a ref to $self
+
+   return $self->_init(@_);    # _init() returns a ref to $self
 }
+
 
 sub _init {
    my $self = shift;
    $self->load($self->{cfgfile_system});
    $self->load($self->{cfgfile_user});
+   #...
    $self->{_util} = App::Transcode::Acxi3::Util->new(
       mime_types => $self->{mime_types},
       xfile      => $self->{user_settings}{COMMAND_FILE}
@@ -62,6 +65,24 @@ sub util {
    return shift()->{_util};
 }
 
+sub cfg {
+   my $self = shift;
+   my $key  = shift;
+   my $val  = shift;
+   $self->{$key} = $val if ($val);
+   return $self->{$key};
+}
+
+sub user_settings {
+   my $self = shift;
+   my $key  = shift;
+   my $val  = shift;
+
+   my $r = $self->cfg('user_settings');
+   $r->{$key} = $val if ($val);
+   return $r->{$key};
+}
+
 sub _locate_ext_binaries {
    my $self = shift;
    foreach my $cmd (qw/FLAC METAFLAC OGG LAME FILE/) {
@@ -69,9 +90,20 @@ sub _locate_ext_binaries {
       my $v = \$self->{user_settings}{$k};
       next unless (defined($$v));
       next if (-x $$v);
-      $$v = $self->{_util}->which($$v);
+      $$v = $self->util()->which($$v);
    }
    return $self;
+}
+
+sub get_tags_flac {
+   my $self = shift;
+   my $file = shift;
+   return unless ($self->util()->check_mime('flac') eq 'flac');
+   return $self->util()->exec_read_kv(
+      $self->user_settings('COMMAND_METAFLAC') .
+      qq( --no-utf8-convert --export-tags-to=- "$file"), 
+      '='
+   );
 }
 
 sub load {
@@ -108,6 +140,7 @@ sub save {
       if (ref($v) eq 'ARRAY') {
          $v = join(',', @$v);
       }
+      next if (!defined($k) || !defined($v));
       $fh->print("$k = $v\n");
    }
    undef $fh;
