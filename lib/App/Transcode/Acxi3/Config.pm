@@ -127,6 +127,7 @@ sub load {
    if (defined($$ut)) {
       $$ut = [ split(/,/, $$ut) ];
    }
+   return $self;
 }
 
 sub save {
@@ -144,6 +145,7 @@ sub save {
       $fh->print("$k = $v\n");
    }
    undef $fh;
+   return $self;
 }
 
 1;

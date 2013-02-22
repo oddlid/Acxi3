@@ -20,7 +20,7 @@ use constant F_SRC_AGE   => F_BASE << 3;
 use constant F_DST_AGE   => F_BASE << 4;
 
 my $_singleton;
-my $_log;
+#my $_log;
 
 sub new {
    my $class = shift;

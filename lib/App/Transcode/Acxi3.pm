@@ -17,15 +17,21 @@ use App::Transcode::Acxi3::Logger;
 
 our $VERSION = '3.0.1';
 
-__PACKAGE__->new(@ARGV)->run() unless caller;
+#__PACKAGE__->new()->run(@ARGV) unless caller;
 
 
 #---
 
+my $_opts = {};
 
 sub new {
    my $class = shift;
    my $self = bless({}, $class);
+
+   $self->{_log} = App::Transcode::Acxi3::Logger->new();
+   $self->{_cfg} = App::Transcode::Acxi3::Config->new();
+   $self->{_log}->level($self->{_cfg}->user_settings('LOG_LEVEL'));
+   
    return $self;
 }
 
